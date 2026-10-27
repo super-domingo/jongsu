@@ -1,5 +1,5 @@
 // 오프라인에서도 열리도록 캐시. 온라인이면 항상 최신 파일을 먼저 받아옴.
-const CACHE = "jongsu-english-v1";
+const CACHE = "jongsu-english-v2";
 const FILES = ["./", "index.html", "css/style.css", "js/data.js", "js/grammar1.js", "js/grammar2.js", "js/app.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png"];
 
 self.addEventListener("install", (e) => {

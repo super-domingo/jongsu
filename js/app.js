@@ -9,7 +9,7 @@ const DEFAULT_STATE = {
   quizzes: [],      // { date, score, total }
   grammar: {},      // 문법 레슨별 { best, total }
   speech: { tries: 0, good: 0 },
-  settings: { rate: 0.85, apiKey: "", model: "claude-opus-5-5", name: "" },
+  settings: { rate: 0.85, apiKey: "", name: "" },
 };
 
 function loadState() {
@@ -624,12 +624,8 @@ function viewRoleplay(id) {
 }
 
 /* ---------- AI 선생님 (Claude API, 브라우저에서 직접 호출) ---------- */
-const MODELS = {
-  "claude-opus-5-5": "Claude Opus 5.5 (가장 똑똑함)",
-  "claude-sonnet-5-5": "Claude Sonnet 5.5 (균형)",
-  "claude-haiku-5-5": "Claude Haiku 5.5 (가장 저렴)",
-};
-const FALLBACK_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5"];
+const AI_MODEL = "claude-sonnet-5-5"; // AI 대화는 Claude Sonnet 5.5로 고정
+const FALLBACK_MODELS = ["claude-sonnet-5-5"];
 const TUTOR_SYSTEM = `You are Emma, a warm, patient native English teacher chatting with Jongsu, a Korean learner whose English is at an easy beginner to lower-intermediate level (about CEFR A1-A2, level 2-4 out of 10). Jongsu works as a physical therapist and is learning for travel, daily conversation and self-improvement.
 
 Rules:
@@ -644,7 +640,7 @@ Rules:
 const aiChats = {}; // 주제별 대화 기록 (화면을 떠나도 앱을 닫기 전까지 유지)
 
 async function callClaude(messages, system) {
-  const model = state.settings.model;
+  const model = AI_MODEL;
   const body = {
     model,
     max_tokens: 2048,
@@ -996,7 +992,7 @@ function viewSettings() {
     <div class="card form">
       <p class="muted small">AI 자유 대화에는 Anthropic의 Claude API 키가 필요해요. console.anthropic.com 에서 발급받을 수 있고, 사용한 만큼 요금이 나와요. 키는 이 휴대폰 브라우저에만 저장되고 Anthropic 외에는 어디에도 보내지 않아요.</p>
       <label>API 키<input id="key" type="password" value="${esc(s.apiKey)}" placeholder="sk-ant-..." autocomplete="off" /></label>
-      <label>AI 모델<select id="model">${Object.entries(MODELS).map(([id, n]) => `<option value="${id}" ${id === s.model ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <p class="muted small">AI 모델: Claude Sonnet 5.5</p>
       <div class="btn-row"><button class="btn primary" id="saveKey">저장</button><button class="btn" id="testKey">연결 테스트</button></div>
       <div id="keyMsg" class="muted small"></div>
     </div>
@@ -1012,10 +1008,9 @@ function viewSettings() {
   $("#name").onchange = (e) => { s.name = e.target.value.trim(); save(); toast("저장했어요"); };
   $("#rate").oninput = (e) => { s.rate = +e.target.value; $("#rateV").textContent = s.rate.toFixed(2) + "배"; save(); };
   $("#testVoice").onclick = () => speak("Hello! Nice to meet you. Let's study English together.");
-  $("#saveKey").onclick = () => { s.apiKey = $("#key").value.trim(); s.model = $("#model").value; save(); toast(s.apiKey ? "저장했어요 ✨" : "키를 지웠어요"); };
-  $("#model").onchange = (e) => { s.model = e.target.value; save(); };
+  $("#saveKey").onclick = () => { s.apiKey = $("#key").value.trim(); save(); toast(s.apiKey ? "저장했어요 ✨" : "키를 지웠어요"); };
   $("#testKey").onclick = async () => {
-    s.apiKey = $("#key").value.trim(); s.model = $("#model").value; save();
+    s.apiKey = $("#key").value.trim(); save();
     const m = $("#keyMsg");
     if (!s.apiKey) { m.textContent = "키를 먼저 입력해 주세요."; return; }
     m.textContent = "연결 중…";
